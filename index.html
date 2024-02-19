@@ -125,12 +125,16 @@
                         recipesContainer.insertBefore(messageElement, recipesContainer.firstChild);  // Add the message at the top
                     }
 
+                    // Retrieve user-selected ingredients from the form directly or from a previously saved variable
+                    const selectedIngredients = Array.from(document.querySelectorAll('input[name="ingredients"]:checked')).map(checkbox => checkbox.value);
+
                     // Handle best match
                     if (data.best_match && data.best_match.length > 0) {
                         const bestMatchSection = document.createElement('section');
                         bestMatchSection.innerHTML = '<h3>Best Match Recipe</h3>';
                         data.best_match.forEach(recipe => {
-                            const recipeElement = createRecipeElement(recipe);
+                            // (Adjusted Feb 18) Pass selectedIngredients to createRecipeElement
+                            const recipeElement = createRecipeElement(recipe, selectedIngredients);
                             bestMatchSection.appendChild(recipeElement);
                         });
                         recipesContainer.appendChild(bestMatchSection);
@@ -143,7 +147,8 @@
                         const suggestionsSection = document.createElement('section');
                         suggestionsSection.innerHTML = '<h3>Other recipes you can make:</h3>';
                         data.additional_suggestions.forEach(recipe => {
-                            const recipeElement = createRecipeElement(recipe);
+                            // (Adjusted Feb 18) Again, pass selectedIngredients to createRecipeElement
+                            const recipeElement = createRecipeElement(recipe, selectedIngredients);
                             suggestionsSection.appendChild(recipeElement);
                         });
                         recipesContainer.appendChild(suggestionsSection);
