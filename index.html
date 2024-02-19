@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Generation Tool</title>
+</head>
+<body>
+    <h1>Welcome to the Recipe Generation Tool!</h1>
+    <h2>Whip Up Magic with What's in Your Fridge!</h2>
+    <p>Select ingredients you have on hand from the list below and hit 'Submit' to get delicious smoothie recipes. Choose at least two to blend the perfect drink!</p>
+    <form id="ingredient-form">
+    </form>
+    <!--<button type="submit" form="ingredient-form">Submit</button> -->
+    <div id="recipesContainer"></div>
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/ingredients')
+                .then(response => response.json())
+                .then(data => {
+                    const form = document.getElementById('ingredient-form');
+
+                    // Assuming 'data' has a 'categories' property
+                    for (const category in data.categories) {
+                        const categoryContainer = document.createElement('div');
+                        categoryContainer.className = 'category';
+
+                        const categoryHeading = document.createElement('h3');
+                        categoryHeading.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                        categoryContainer.appendChild(categoryHeading);
+
+                        data.categories[category].forEach(ingredient => {
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.id = ingredient;
+                            checkbox.name = 'ingredients';
+                            checkbox.value = ingredient;
+
+                            const label = document.createElement('label');
+                            label.htmlFor = ingredient;
+                            label.textContent = ingredient;
+
+                            categoryContainer.appendChild(checkbox);
+                            categoryContainer.appendChild(label);
+                            categoryContainer.appendChild(document.createElement('br'));
+                        });
+
+                        form.appendChild(categoryContainer);
+                    }
+
+                    const submitButton = document.createElement('button');
+                    submitButton.type = 'submit';
+                    submitButton.textContent = 'Submit';
+                    form.appendChild(submitButton);
+                })
+                .catch(error => console.error('Error fetching ingredients:', error));
+        });
+        
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('ingredient-form');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const selectedIngredients = Array.from(document.querySelectorAll('input[name="ingredients"]:checked')).map(checkbox => checkbox.value);
+
+                fetch('/submit-ingredients', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ selectedIngredients }),
+                })
+
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(suggested_recipes => {
+                    // Code to handle the suggested recipes goes here
+
+                    // Access teh container where we will display the recipes
+                    const recipesContainer = document.getElementById('recipesContainer');
+                    recipesContainer.innerHTML = ''; // Clear previous suggestions
+
+                    if (suggested_recipes.length === 0) {
+                        // Display a message if no recipes were found
+                        recipesContainer.innerHTML = '<p>No matching recipes found. Please try different ingredients.</p>';
+                    } else {
+                        // Iterate through the suggested recipes and create elements for each
+                        suggested_recipes.forEach(recipe => {
+                            // Create a container for the recipe
+                            const recipeElement = document.createElement('div');
+                            recipeElement.className = 'recipe';
+
+                            // Add the recipe name
+                            const recipeName = document.createElement('h3');
+                            recipeName.textContent = recipe.name;
+                            recipeElement.appendChild(recipeName);
+
+                            // Add the list of detailed ingredients
+                            const ingredientsList = document.createElement('ul');
+                            recipe.detailed_ingredients.forEach(ingredient => {
+                                const ingredientItem = document.createElement('li');
+                                ingredientItem.textContent = ingredient;
+                                ingredientsList.appendChild(ingredientItem);
+                            });
+                            recipeElement.appendChild(ingredientsList);
+
+                            // Add the preparation steps
+                            const preparation = document.createElement('p');
+                            preparation.textContent = 'Preparation: ' + recipe.preparation;
+                            recipeElement.appendChild(preparation);
+
+                            // Append the recipe container to the main recipes container
+                            recipesContainer.appendChild(recipeElement);
+                        });
+                    }
+                })        
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>

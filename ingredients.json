@@ -1,0 +1,58 @@
+{
+    "categories": {
+        "fruits": [
+            "strawberries",
+            "blueberries",
+            "bananas",
+            "mangos",
+            "peaches",
+            "raspberries",
+            "watermelon",
+            "oranges",
+            "tomatoes",
+            "limes",
+            "lemons"
+        ],
+        "vegetables": [
+            "spinach",
+            "avocados",
+            "beets",
+            "carrots",
+            "cucumbers"
+        ],
+        "bases": [
+            "yogurt",
+            "milk",
+            "coconut milk",
+            "juice"
+        ],
+        "additives": [
+            "honey",
+            "sugar",
+            "peanut butter",
+            "vanilla"
+        ]
+    },
+    "substitutes": {
+        "milk": [
+            "almond milk", 
+            "soy milk", 
+            "coconut milk"
+        ],
+        "honey": [
+            "agave syrup", 
+            "maple syrup"
+        ],
+        "yogurt": [
+            "coconut yogurt", 
+            "almond yogurt"
+        ],
+        "peanut butter": [
+            "sunflower seed butter"
+        ]
+    }
+}
+
+
+
+  
