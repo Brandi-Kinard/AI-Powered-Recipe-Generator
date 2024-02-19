@@ -51,12 +51,12 @@ def submit_ingredients():
         best_match = suggested_recipes[0]
         # Calculate the match percentage between the user's selected ingredients adn teh best match's ingredients
         match_percentage = len(set(best_match['ingredients']) & set(user_ingredients)) / len(set(best_match['ingredients']))
-
-        # If the match percentage is less than 50%
-        if match_percentage < 0.5:  # less than 50% match
+        
+        # If the match percentage is less than 100%
+        if match_percentage < 1.0:  # If not all user's ingredients are used
             # Set a message to inform the user that no recipe was found that uses all of their ingredients
             response_data['message'] = "Hmm, it seems we couldn't find a smoothie that uses all your chosen ingredients. But don't worry, we've still got something tasty for you! Here's a smoothie recipe that uses at least some of your selected ingredients. You might need to grab a few extra items next time you're out shopping, though. Keep it chill and remember, the perfect smoothie mix is just a few ticks away!"
-
+        
         response_data['best_match'] = [best_match]
         
         # Find additional suggestions
