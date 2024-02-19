@@ -34,25 +34,39 @@ def ingredients():
     except FileNotFoundError:
         return jsonify({"error": "Ingredients database not found."}), 404
 
-
 @app.route('/submit-ingredients', methods=['POST'])
 def submit_ingredients():
-    # Get the list of ingredients from the request JSON
     user_ingredients = request.json['selectedIngredients']
-    # Use the suggest_recipe function to find matching recipes
     suggested_recipes = suggest_recipe(user_ingredients, recipes_data)
-
-    # Find additional suggestions from the same cluster as the best match
-    additional_suggestions = []
-    if suggested_recipes:
-        best_match_cluster = suggested_recipes[0]['cluster']
-        additional_suggestions = [recipe for recipe in recipes_data if recipe['cluster'] == best_match_cluster and recipe not in suggested_recipes]
-
-    # Limit to a few suggestions for brevity
-    additional_suggestions = additional_suggestions[:3]
     
-    # Return the additional suggestions as JSON
-    return jsonify({"best_match": suggested_recipes, "additional_suggestions": additional_suggestions})
+    response_data = {
+        "best_match": None,
+        "additional_suggestions": [],
+        "message": None
+    }
+
+    # Check if there are any suggested recipes (i.e., if suggested_recipes is not empty)
+    if suggested_recipes:
+        # If there are suggestions, retrieve the best match
+        best_match = suggested_recipes[0]
+        # Calculate the match percentage between the user's selected ingredients adn teh best match's ingredients
+        match_percentage = len(set(best_match['ingredients']) & set(user_ingredients)) / len(set(best_match['ingredients']))
+
+        # If the match percentage is less than 50%
+        if match_percentage < 0.5:  # less than 50% match
+            # Set a message to inform the user that no recipe was found that uses all of their ingredients
+            response_data['message'] = "Hmm, it seems we couldn't find a smoothie that uses all your chosen ingredients. But don't worry, we've still got something tasty for you! Here's a smoothie recipe that uses at least some of your selected ingredients. You might need to grab a few extra items next time you're out shopping, though. Keep it chill and remember, the perfect smoothie mix is just a few ticks away!"
+
+        response_data['best_match'] = [best_match]
+        
+        # Find additional suggestions
+        best_match_cluster = best_match['cluster']
+        additional_suggestions = [recipe for recipe in recipes_data if recipe['cluster'] == best_match_cluster and recipe['name'] != best_match['name']]
+        response_data['additional_suggestions'] = additional_suggestions[:5]  # Limit to 5 suggestions for simplicity
+    else:
+        response_data['message'] = "No matching recipes found. Please try different ingredients."
+    
+    return jsonify(response_data)
 
 if __name__ == "__main__":
     app.run(debug=True)

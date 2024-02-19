@@ -106,6 +106,13 @@
                     const recipesContainer = document.getElementById('recipesContainer');
                     recipesContainer.innerHTML = ''; // Clear previous suggestions
 
+                    // Display a helpful message when the best match recipe doesn't closely align with the user's selected ingredients
+                    if (data.message) {
+                        const messageElement = document.createElement('p');
+                        messageElement.innerHTML = data.message;
+                        recipesContainer.insertBefore(messageElement, recipesContainer.firstChild);  // Add the message at the top
+                    }
+
                     // Handle best match
                     if (data.best_match && data.best_match.length > 0) {
                         const bestMatchSection = document.createElement('section');
