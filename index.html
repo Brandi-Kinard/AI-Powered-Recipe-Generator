@@ -56,7 +56,30 @@
                 })
                 .catch(error => console.error('Error fetching ingredients:', error));
         });
-        
+
+        // Helper function that constructs and returns a DOM element for a recipe
+        function createRecipeElement(recipe) {
+            const recipeElement = document.createElement('div');
+            recipeElement.className = 'recipe';
+
+            const recipeName = document.createElement('h4');
+            recipeName.textContent = recipe.name;
+            recipeElement.appendChild(recipeName);
+
+            const ingredientsList = document.createElement('ul');
+            recipe.detailed_ingredients.forEach(ingredient => {
+                const ingredientItem = document.createElement('li');
+                ingredientItem.textContent = ingredient;
+                ingredientsList.appendChild(ingredientItem);
+            });
+            recipeElement.appendChild(ingredientsList);
+
+            const preparationSteps = document.createElement('div');
+            preparationSteps.innerHTML = `<strong>Preparation Steps:</strong> <br> ${recipe.preparation_steps.join('<br>')}`;
+            recipeElement.appendChild(preparationSteps);
+
+            return recipeElement;
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('ingredient-form');
@@ -78,47 +101,35 @@
                     }
                     return response.json();
                 })
-                .then(suggested_recipes => {
-                    // Code to handle the suggested recipes goes here
-
-                    // Access teh container where we will display the recipes
+                // Display best match and additional suggestions based on clustering results
+                .then(data => {
                     const recipesContainer = document.getElementById('recipesContainer');
                     recipesContainer.innerHTML = ''; // Clear previous suggestions
 
-                    if (suggested_recipes.length === 0) {
-                        // Display a message if no recipes were found
-                        recipesContainer.innerHTML = '<p>No matching recipes found. Please try different ingredients.</p>';
-                    } else {
-                        // Iterate through the suggested recipes and create elements for each
-                        suggested_recipes.forEach(recipe => {
-                            // Create a container for the recipe
-                            const recipeElement = document.createElement('div');
-                            recipeElement.className = 'recipe';
-
-                            // Add the recipe name
-                            const recipeName = document.createElement('h3');
-                            recipeName.textContent = recipe.name;
-                            recipeElement.appendChild(recipeName);
-
-                            // Add the list of detailed ingredients
-                            const ingredientsList = document.createElement('ul');
-                            recipe.detailed_ingredients.forEach(ingredient => {
-                                const ingredientItem = document.createElement('li');
-                                ingredientItem.textContent = ingredient;
-                                ingredientsList.appendChild(ingredientItem);
-                            });
-                            recipeElement.appendChild(ingredientsList);
-
-                            // Add the preparation steps
-                            const preparation = document.createElement('p');
-                            preparation.textContent = 'Preparation: ' + recipe.preparation;
-                            recipeElement.appendChild(preparation);
-
-                            // Append the recipe container to the main recipes container
-                            recipesContainer.appendChild(recipeElement);
+                    // Handle best match
+                    if (data.best_match && data.best_match.length > 0) {
+                        const bestMatchSection = document.createElement('section');
+                        bestMatchSection.innerHTML = '<h3>Best Match Recipe</h3>';
+                        data.best_match.forEach(recipe => {
+                            const recipeElement = createRecipeElement(recipe);
+                            bestMatchSection.appendChild(recipeElement);
                         });
+                        recipesContainer.appendChild(bestMatchSection);
+                    } else {
+                        recipesContainer.innerHTML = '<p>No matching recipes found. Please try different ingredients.</p>';
                     }
-                })        
+
+                    // Handle additional suggestions
+                    if (data.additional_suggestions && data.additional_suggestions.length > 0) {
+                        const suggestionsSection = document.createElement('section');
+                        suggestionsSection.innerHTML = '<h3>Other recipes you can make:</h3>';
+                        data.additional_suggestions.forEach(recipe => {
+                            const recipeElement = createRecipeElement(recipe);
+                            suggestionsSection.appendChild(recipeElement);
+                        });
+                        recipesContainer.appendChild(suggestionsSection);
+                    }
+                }) 
                 .catch(error => console.error('Error:', error));
             });
         });
