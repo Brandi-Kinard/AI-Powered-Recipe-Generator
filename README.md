@@ -6,5 +6,4 @@ We built this tool to make your life simpler. It suggests recipes based on what 
 
 This isn't just a recipe app; it's like having a personal kitchen assistant that evolves with you. It's all about making healthy eating a practical, stress-free part of your daily routine. Cool right? We're excited to have you onboard! 🥳
 
-Would there be a 4th branch added?
-
+🥤🫐🥭🍍 Thank You 🍍🥭🫐🥤
