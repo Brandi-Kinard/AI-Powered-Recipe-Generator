@@ -57,8 +57,10 @@
                 .catch(error => console.error('Error fetching ingredients:', error));
         });
 
-        // Helper function that constructs and returns a DOM element for a recipe
-        function createRecipeElement(recipe) {
+        // Creates a DOM element for a recipe.
+        // Takes two arguments: the recipe object and an array of user-selected ingredients
+        // This function highlights the user-selected ingredients within the detailed ingredients of the recipe by making them bold
+        function createRecipeElement(recipe, userIngredients) {
             const recipeElement = document.createElement('div');
             recipeElement.className = 'recipe';
 
@@ -69,18 +71,28 @@
             const ingredientsList = document.createElement('ul');
             recipe.detailed_ingredients.forEach(ingredient => {
                 const ingredientItem = document.createElement('li');
-                ingredientItem.textContent = ingredient;
+                // Check if the current ingredient includes any of the user-selected ingredients
+                const highlightedText = userIngredients.reduce((acc, userIngredient) => {
+                    // If the detailed ingredient includes the user-selected ingredient, make it bold
+                    if (acc.toLowerCase().includes(userIngredient.toLowerCase())) {
+                        return acc.replace(new RegExp(userIngredient, 'gi'), `<strong>${userIngredient}</strong>`);
+                    }
+                    return acc;
+                }, ingredient);
+        
+                ingredientItem.innerHTML = highlightedText; // Use innerHTML to render the bold tag
                 ingredientsList.appendChild(ingredientItem);
             });
             recipeElement.appendChild(ingredientsList);
 
             const preparationSteps = document.createElement('div');
-            preparationSteps.innerHTML = `<strong>Preparation Steps:</strong> <br> ${recipe.preparation_steps.join('<br>')}`;
+            preparationSteps.innerHTML = `<strong>Preparation Steps:</strong><br>${recipe.preparation_steps.join('<br>')}`;
             recipeElement.appendChild(preparationSteps);
 
             return recipeElement;
         }
 
+        // Fetch teh ingredients data from the server and display it in the form of a list of checkboxes
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('ingredient-form');
             form.addEventListener('submit', (event) => {
