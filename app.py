@@ -41,8 +41,6 @@ def submit_ingredients():
     user_ingredients = request.json['selectedIngredients']
     # Use the suggest_recipe function to find matching recipes
     suggested_recipes = suggest_recipe(user_ingredients, recipes_data)
-    # Return the suggestions as JSON
-    return jsonify(suggested_recipes)
 
     # Find additional suggestions from the same cluster as the best match
     additional_suggestions = []
