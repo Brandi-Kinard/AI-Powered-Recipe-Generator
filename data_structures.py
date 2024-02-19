@@ -30,7 +30,11 @@ def suggest_recipe(user_ingredients, recipes_data):
     # Sort suggested recipes by their match score, highest first
     suggested_recipes.sort(key=lambda x: x['match_score'], reverse=True)
 
-    return suggested_recipes
+    # Return only the match recipe instead of all
+    if suggested_recipes:
+        return [suggested_recipes[0]]
+    else:
+        return []
 
 '''
 # CHECKS FOR A SUBSET, CALCULATE THE MATCH SCORE (this was replaced by the code above)
