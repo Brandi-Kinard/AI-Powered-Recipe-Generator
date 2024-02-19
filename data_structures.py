@@ -1,4 +1,7 @@
 import json
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MultiLabelBinarizer
+import numpy as np
 
 # Load ingredients and recipes data
 # The 'load_data' function reads both 'ingredients.json' and 'recipes.json' files and returns their data.
@@ -35,6 +38,23 @@ def suggest_recipe(user_ingredients, recipes_data):
         return [suggested_recipes[0]]
     else:
         return []
+
+# Implement clustering for ingredient grouping
+def cluster_recipes(recipes_data, n_clusters=5):
+    # Convert recipe ingredients to a format suitable for clustering
+    mlb = MultiLabelBinarizer()
+    ingredients_matrix = mlb.fit_transform([recipe['ingredients'] for recipe in recipes_data])
+    
+    # Perform KMeans clustering
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    kmeans.fit(ingredients_matrix)
+    
+    # Assign each recipe to a cluster
+    labels = kmeans.labels_
+    for i, recipe in enumerate(recipes_data):
+        recipe['cluster'] = int(labels[i])
+    
+    return recipes_data, mlb.classes_
 
 '''
 # CHECKS FOR A SUBSET, CALCULATE THE MATCH SCORE (this was replaced by the code above)
