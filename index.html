@@ -68,6 +68,14 @@
             recipeName.textContent = recipe.name;
             recipeElement.appendChild(recipeName);
 
+            // Check if the recipe has dietary types and display them
+            if (recipe.dietary_types && recipe.dietary_types.length > 0) {
+                const dietaryTypesText = `Dietary types: ${recipe.dietary_types.join(' and ')}`;
+                const dietaryTypesElement = document.createElement('p');
+                dietaryTypesElement.textContent = dietaryTypesText;
+                recipeElement.appendChild(dietaryTypesElement);
+            }
+
             const ingredientsList = document.createElement('ul');
             recipe.detailed_ingredients.forEach(ingredient => {
                 const ingredientItem = document.createElement('li');
