@@ -60,47 +60,76 @@
         // Creates a DOM element for a recipe.
         // Takes two arguments: the recipe object and an array of user-selected ingredients
         // This function highlights the user-selected ingredients within the detailed ingredients of the recipe by making them bold
+        // Now incorporates ingredient substitutions
         function createRecipeElement(recipe, userIngredients) {
+            // Create a new div element and set its calss to "recipe"
+            // Will later be used to display a recipe
             const recipeElement = document.createElement('div');
             recipeElement.className = 'recipe';
 
+            // Add recipe name
             const recipeName = document.createElement('h4');
             recipeName.textContent = recipe.name;
             recipeElement.appendChild(recipeName);
 
-            // Check if the recipe has dietary types and display them
+            // Add dietary type(s)
+            // Use the ternary operator to check if the dietary types exist and length has greater than 0
             if (recipe.dietary_types && recipe.dietary_types.length > 0) {
+                // If so...
+                // Create a paragraph element
                 const dietaryTypesText = `Dietary types: ${recipe.dietary_types.join(' and ')}`;
                 const dietaryTypesElement = document.createElement('p');
                 dietaryTypesElement.textContent = dietaryTypesText;
+                // Add to the recipe element
                 recipeElement.appendChild(dietaryTypesElement);
             }
 
-            const ingredientsList = document.createElement('ul');
-            recipe.detailed_ingredients.forEach(ingredient => {
-                const ingredientItem = document.createElement('li');
-                // Check if the current ingredient includes any of the user-selected ingredients
-                const highlightedText = userIngredients.reduce((acc, userIngredient) => {
-                    // If the detailed ingredient includes the user-selected ingredient, make it bold
-                    if (acc.toLowerCase().includes(userIngredient.toLowerCase())) {
-                        return acc.replace(new RegExp(userIngredient, 'gi'), `<strong>${userIngredient}</strong>`);
-                    }
-                    return acc;
-                }, ingredient);
-        
-                ingredientItem.innerHTML = highlightedText; // Use innerHTML to render the bold tag
-                ingredientsList.appendChild(ingredientItem);
-            });
-            recipeElement.appendChild(ingredientsList);
+            // Fetch the ingredients data from the server
+            fetch('/ingredients')
+            .then(response => response.json())
+            .then(data => {
+                const substitutes = data.substitutes;
+                const ingredientsList = document.createElement('ul');
 
-            const preparationSteps = document.createElement('div');
-            preparationSteps.innerHTML = `<strong>Preparation Steps:</strong><br>${recipe.preparation_steps.join('<br>')}`;
-            recipeElement.appendChild(preparationSteps);
+                // Loop iterates over 'detailed_ingredients'property of a recipe object, which contains a list of ingredients used in the recipe
+                recipe.detailed_ingredients.forEach(ingredient => {
+                    // Create a list a new list item element
+                    const ingredientItem = document.createElement('li');
+                    // Highlight any ingredients that are included in the user's selection of ingredients
+                    let textContent = ingredient;
+                    userIngredients.forEach(userIngr => {
+                        if (textContent.toLowerCase().includes(userIngr.toLowerCase())) {
+                            const userIngrRegEx = new RegExp(userIngr, "gi");
+                            textContent = textContent.replace(userIngrRegEx, (match) => `<strong>${match}</strong>`);
+                        }
+                    });
+ 
+                    // Iterate over the keys of an object called 'subsitutes'
+                    // For each key, check if the current ingredient string contains the current key
+                    Object.keys(substitutes).forEach(sub => {
+                        if (ingredient.toLowerCase().includes(sub.toLowerCase())) {
+                            // If so...
+                            // Replace the matched portion of the ingredient string with the substitutes
+                            const altSubs = substitutes[sub].join(', ');
+                            textContent += ` (Substitute ${sub} with ${altSubs})`;
+                        }
+                    });
+
+                    ingredientItem.innerHTML = textContent; 
+                    ingredientsList.appendChild(ingredientItem);
+                });
+                recipeElement.appendChild(ingredientsList);
+
+                const preparationSteps = document.createElement('div');
+                preparationSteps.innerHTML = `<strong>Preparation Steps:</strong><br>${recipe.preparation_steps.join('<br>')}`;
+                recipeElement.appendChild(preparationSteps);
+            });
 
             return recipeElement;
+
         }
 
-        // Fetch teh ingredients data from the server and display it in the form of a list of checkboxes
+        // Fetch the ingredients data from the server and display it in the form of a list of checkboxes
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('ingredient-form');
             form.addEventListener('submit', (event) => {
